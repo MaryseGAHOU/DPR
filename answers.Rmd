@@ -1,0 +1,45 @@
+## Etape 1 : Importez le fichier csv appelé chapter6data.csv
+```{r}
+library(readr)
+gdp <- readr::read_csv('./chapter6/data/chapter6data.csv', show_col_types = FALSE)
+```
+
+## Étape 2 : Importez un ensemble de données contenant la longitude et la latitude à partir de cette feuille Gsheet : https://docs.google.com/spreadsheets/d/1nehKEBKTQx11LZuo5ZJFKTVS0p5y1ysMPSOSX_m8dS8/edit?usp=sharing
+```{r}
+library(gsheet)
+locations <- gsheet::gsheet2tbl('https://docs.google.com/spreadsheets/d/1nehKEBKTQx11LZuo5ZJFKTVS0p5y1ysMPSOSX_m8dS8/edit?usp=sharing')
+```
+
+## Etape 3 : Supprimez la colonne X1 du bloc de données gdp
+```{r}
+colnames(gdp)
+```
+```{r}
+gdp$X1 <- NULL
+```
+
+```{r}
+colnames(gdp)
+```
+## Etape 4 : Filtrez la trame de données gdp pour ne conserver que les pays suivants : "États-Unis", "Canada", "Japon", "Belgique" et "France"
+```{r}
+library(dplyr)
+gdp2 <- filter(gdp, country == "États-Unis" | country == "Canada" | country == "Japon" | country == "Belgique" | country == "France")
+```
+
+## Etape 5 : "Rallonge" les données (modifier de large à long) le dataframe "gdp2" pour obtenir trois colonnes : "country", "year", "gdp"
+```{r}
+library(tidyr)
+gdp3 <- gdp2 %>%
+  pivot_longer(
+    cols = starts_with("19"), 
+    names_to = "year",
+    values_to = "gdp"
+  )
+```
+
+## Étape 6 : Fusionner le bloc de données "locations" au bloc de données "gdp3"
+```{r}
+gdp4 <- left_join(locations, gdp3, c("country"))
+```
+
